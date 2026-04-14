@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" style=""><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRAFTON Business Trip Expense Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary-navy: #1a1a2e;
+        --accent-gold: #f4a535;
+        --accent-gold-dark: #e0962d;
+        --light-bg: #f4f6f9;
+        --border-color: #ddd;
+        --text-dark: #333;
+        --text-light: #666;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--light-bg);
+        margin: 0;
+        padding: 20px;
+        color: var(--text-dark);
+        -webkit-print-color-adjust: exact;
+      }
+
+      .app-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-radius: 8px;
+        overflow: hidden;
+        min-height: 100vh;
+      }
+
+      /* ----- TOP BAR & CONTROLS ----- */
+      .top-bar {
+        background-color: var(--primary-navy);
+        color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 5px solid var(--accent-gold);
+      }
+
+      .top-title h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .top-title .subtitle {
+        font-size: 12px;
+        color: var(--accent-gold);
+        margin-top: 4px;
+        font-weight: 600;
+      }
+
+      .view-controls {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.2s;
+        font-size: 14px;
+      }
+
+      .btn-toggle {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #ccc;
+      }
+
+      .btn-toggle.active {
+        background-color: var(--accent-gold);
+        color: var(--primary-navy);
+      }
+
+      .btn-primary {
+        background-color: var(--accent-gold);
+        color: var(--primary-navy);
+      }
+
+      .btn-primary:hover {
+        background-color: var(--accent-gold-dark);
+      }
+
+      .btn-danger {
+        background-color: #ffebee;
+        color: #c62828;
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+
+      .btn-danger:hover {
+        background-color: #ffcdd2;
+      }
+
+      /* ----- EDIT MODE STYLES ----- */
+      #edit-view {
+        padding: 30px;
+      }
+
+      .form-section {
+        margin-bottom: 30px;
+        background: white;
+        border: 1px solid #eee;
+        border-radius: 6px;
+        padding: 20px;
+      }
+
+      .form-section-header {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary-navy);
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--accent-gold);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-light);
+        margin-bottom: 5px;
+      }
+
+      .form-input {
+        padding: 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: var(--primary-navy);
+      }
+
+      /* Table Inputs */
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .data-table th {
+        text-align: left;
+        padding: 8px;
+        background-color: #f8f9fa;
+        color: var(--text-light);
+        font-size: 12px;
+        font-weight: 600;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .data-table td {
+        padding: 4px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .table-input {
+        width: 100%;
+        padding: 6px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        box-sizing: border-box;
+      }
+
+      .table-input:focus {
+        border-color: var(--primary-navy);
+        outline: none;
+      }
+
+      .readonly-cell {
+        background-color: #f1f3f5;
+        font-weight: 600;
+        color: #333;
+        border: 1px solid #ddd;
+        text-align: right;
+      }
+
+      /* Receipt Upload */
+      .receipt-btn {
+        background: none;
+        border: 1px dashed #bbb;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 11px;
+        cursor: pointer;
+        color: #888;
+        white-space: nowrap;
+        transition: all 0.2s;
+      }
+      .receipt-btn:hover {
+        border-color: var(--accent-gold);
+        color: var(--accent-gold);
+      }
+      .receipt-btn.has-file {
+        border-color: #2e7d32;
+        color: #2e7d32;
+        background: #e8f5e9;
+      }
+      .receipt-thumb {
+        width: 36px;
+        height: 36px;
+        object-fit: cover;
+        border-radius: 3px;
+        cursor: pointer;
+        border: 1px solid #ddd;
+        vertical-align: middle;
+      }
+      .receipt-input {
+        display: none;
+      }
+
+      /* Receipt Preview in Report */
+      .receipt-section {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px dashed #ddd;
+      }
+      .receipt-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-top: 15px;
+      }
+      .receipt-item {
+        text-align: center;
+      }
+      .receipt-item img {
+        width: 100%;
+        max-height: 140px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+      .receipt-item .receipt-label {
+        font-size: 10px;
+        color: #666;
+        margin-top: 5px;
+        word-break: break-word;
+      }
+
+      /* Lightbox */
+      .lightbox-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+      }
+      .lightbox-overlay.show {
+        display: flex;
+      }
+      .lightbox-overlay img {
+        max-width: 90vw;
+        max-height: 90vh;
+        border-radius: 6px;
+        box-shadow: 0 0 40px rgba(0,0,0,0.5);
+      }
+      .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 32px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      /* Submit Modal */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 8888;
+        justify-content: center;
+        align-items: center;
+      }
+      .modal-overlay.show {
+        display: flex;
+      }
+      .modal-box {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        max-width: 480px;
+        width: 90%;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      }
+      .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--primary-navy);
+        margin-bottom: 15px;
+      }
+      .modal-body {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+      .btn-cancel {
+        background: #f1f3f5;
+        color: #555;
+        padding: 8px 16px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+      }
+      .submit-info {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 12px;
+        font-size: 13px;
+        margin-bottom: 15px;
+      }
+      .submit-info div {
+        margin-bottom: 6px;
+      }
+      .submit-info strong {
+        color: var(--primary-navy);
+      }
+
+      /* Share Link Modal */
+      .share-link-box {
+        background: #f0f4ff;
+        border: 1px solid #c5d0f0;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 12px;
+        font-family: monospace;
+        word-break: break-all;
+        color: #1a1a2e;
+        margin-bottom: 12px;
+        max-height: 80px;
+        overflow-y: auto;
+        line-height: 1.5;
+      }
+      /* Compliance Panel */
+      .compliance-panel {
+        margin-top: 20px;
+        border: 1px solid #eee;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .compliance-header {
+        background: #1a1a2e;
+        color: white;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .compliance-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .compliance-table th {
+        background: #f8f9fa;
+        padding: 7px 12px;
+        text-align: left;
+        color: #555;
+        font-weight: 600;
+        border-bottom: 1px solid #ddd;
+      }
+      .compliance-table td {
+        padding: 7px 12px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .compliance-ok { color: #2e7d32; font-weight: 700; }
+      .compliance-warn { color: #ef6c00; font-weight: 700; }
+      .compliance-over { color: #c62828; font-weight: 700; }
+      .cap-badge {
+        display: inline-block;
+        background: #fff3cd;
+        border: 1px solid #f4a535;
+        color: #7a5200;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 5px;
+        border-radius: 3px;
+        margin-left: 4px;
+      }
+      .net-total-row {
+        background: #fff8e1;
+        font-weight: 700;
+      }
+      .daily-limit-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 15px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px dashed #ddd;
+      }
+      .limit-input-group {
+        display: flex;
+        flex-direction: column;
+      }
+      .limit-input-group label {
+        font-size: 11px;
+        color: #666;
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+      .limit-input-group .limit-hint {
+        font-size: 10px;
+        color: #aaa;
+        margin-top: 2px;
+      }
+      .share-status {
+        font-size: 12px;
+        color: #2e7d32;
+        font-weight: 600;
+        margin-top: 8px;
+        min-height: 18px;
+      }
+      /* Read-only overlay badge */
+      .readonly-banner {
+        background: #fff8e1;
+        border: 1px solid #f4a535;
+        border-radius: 6px;
+        padding: 10px 16px;
+        font-size: 13px;
+        color: #7a5200;
+        font-weight: 600;
+        text-align: center;
+        margin: 0 30px 20px 30px;
+      }
+
+      .summary-row td {
+        background-color: #1a1a2e;
+        color: white;
+        font-weight: 600;
+        padding: 10px;
+        text-align: right;
+      }
+
+      textarea.form-input {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      /* ----- PREVIEW MODE STYLES (Based on previous nice report) ----- */
+      #preview-view {
+        display: none; /* Hidden by default */
+        padding: 40px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .report-header {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 20px;
+      }
+
+      .report-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary-navy);
+        text-transform: uppercase;
+        margin: 0 0 5px 0;
+      }
+
+      .report-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+        font-size: 14px;
+      }
+
+      .report-meta-item strong {
+        color: #888;
+        font-size: 11px;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      .stat-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 6px;
+        border-left: 3px solid var(--primary-navy);
+      }
+
+      .stat-card.highlight {
+        background: #fff8e1;
+        border-left-color: var(--accent-gold);
+      }
+
+      .stat-label {
+        font-size: 11px;
+        color: #666;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      .stat-val {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary-navy);
+        margin-top: 4px;
+      }
+
+      .report-section {
+        margin-bottom: 30px;
+      }
+
+      .report-h2 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary-navy);
+        border-bottom: 2px solid var(--accent-gold);
+        padding-bottom: 8px;
+        margin-bottom: 15px;
+        display: inline-block;
+      }
+
+      .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      .report-table th {
+        background: #f1f3f5;
+        padding: 10px;
+        text-align: left;
+        font-weight: 600;
+        color: #555;
+        border-bottom: 2px solid #ddd;
+      }
+
+      .report-table td {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        color: #333;
+      }
+
+      /* Badges */
+      .badge {
+        display: inline-block;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      .bg-flight {
+        background: #e3f2fd;
+        color: #1565c0;
+      }
+      .bg-hotel {
+        background: #f3e5f5;
+        color: #7b1fa2;
+      }
+      .bg-transport {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .bg-meals {
+        background: #fff3e0;
+        color: #ef6c00;
+      }
+      .bg-roaming {
+        background: #e0f2f1;
+        color: #00695c;
+      }
+      .bg-insurance {
+        background: #ffebee;
+        color: #c62828;
+      }
+      .bg-others {
+        background: #eceff1;
+        color: #455a64;
+      }
+
+      /* Progress bars */
+      .cat-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+      .cat-name {
+        width: 120px;
+        font-weight: 500;
+      }
+      .cat-bar-bg {
+        flex: 1;
+        background: #eee;
+        height: 8px;
+        border-radius: 4px;
+        margin: 0 15px;
+        overflow: hidden;
+      }
+      .cat-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+      }
+      .cat-amt {
+        width: 80px;
+        text-align: right;
+        font-weight: 600;
+      }
+
+      /* Signatures */
+      .sig-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        margin-top: 50px;
+      }
+      .sig-box {
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+      }
+      .sig-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #888;
+        text-transform: uppercase;
+        margin-bottom: 30px;
+      }
+      .sig-line {
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .print-fab {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: var(--accent-gold);
+        color: var(--primary-navy);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        z-index: 100;
+        display: none; /* Only show in preview */
+      }
+
+      .print-fab:hover {
+        transform: translateY(-2px);
+        background: var(--accent-gold-dark);
+      }
+
+      @media print {
+        .top-bar,
+        .print-fab,
+        .lightbox-overlay,
+        .modal-overlay,
+        .readonly-banner {
+          display: none !important;
+        }
+        body {
+          background: white;
+          padding: 0;
+          margin: 0;
+        }
+        .app-container {
+          box-shadow: none;
+          margin: 0;
+          max-width: 100%;
+          border-radius: 0;
+          overflow: visible;
+        }
+        #preview-view {
+          display: block !important;
+          padding: 20px;
+          margin: 0;
+        }
+        #edit-view {
+          display: none !important;
+        }
+        .report-section {
+          page-break-inside: avoid;
+        }
+        .report-table {
+          page-break-inside: auto;
+        }
+        .report-table tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
+        }
+        .sig-grid {
+          page-break-inside: avoid;
+        }
+        .stat-cards {
+          page-break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body style="">
+    <div class="app-container">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div class="top-title">
+          <h1>Business Trip Expense Report</h1>
+          <div class="subtitle">KRAFTON Taiwan</div>
+        </div>
+        <div class="view-controls">
+          <button class="btn btn-toggle active" id="btn-edit-mode" onclick="switchMode('edit')">📝 Edit Mode</button>
+          <button class="btn btn-toggle" id="btn-preview-mode" onclick="switchMode('preview')">
+            👁 Preview Report
+          </button>
+        </div>
+      </div>
+
+      <!-- EDIT VIEW -->
+      <div id="edit-view">
+        <!-- Section A: Trip Info -->
+        <div class="form-section">
+          <div class="form-section-header">Trip Information</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Applicant Name</label>
+              <input type="text" class="form-input" id="inp-applicant" value="Wenchi">
+            </div>
+            <div class="form-group">
+              <label>Trip Name</label>
+              <input type="text" class="form-input" id="inp-tripname" value="2026 Korea HQ Business Trip">
+            </div>
+            <div class="form-group">
+              <label>Application Date</label>
+              <input type="date" class="form-input" id="inp-appdate" value="2026-03-23">
+            </div>
+            <div class="form-group">
+              <label>Trip Period From</label>
+              <input type="date" class="form-input" id="inp-datefrom" value="2026-03-16" onchange="recalcAll()">
+            </div>
+            <div class="form-group">
+              <label>Trip Period To</label>
+              <input type="date" class="form-input" id="inp-dateto" value="2026-03-19" onchange="recalcAll()">
+            </div>
+            <div class="form-group" style="grid-column: span 1;">
+              <label>Destination Region Tier</label>
+              <select class="form-input" id="inp-tier" onchange="setTierLimits(this.value)">
+                <option value="">— Select Tier —</option>
+                <option value="1">Tier 1 — USA / Canada / UK / SG / AU / UAE</option>
+                <option value="2">Tier 2 — Germany / Japan / HK / Europe (others)</option>
+                <option value="3" selected="">Tier 3 — Korea / China / SEA / India / Others</option>
+                <option value="0">Custom (Manual Input)</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+              <label id="rate-label">Foreign Currency → NTD Exchange Rate</label>
+              <div style="display:flex; gap:6px; align-items:stretch;">
+                <select class="form-input" id="inp-currency" style="width:80px; flex-shrink:0;" onchange="updateRateLabel()">
+                  <option value="krw" selected="">KRW</option>
+                  <option value="jpy">JPY</option>
+                  <option value="usd">USD</option>
+                  <option value="eur">EUR</option>
+                  <option value="sgd">SGD</option>
+                  <option value="thb">THB</option>
+                </select>
+                <input type="number" class="form-input" id="inp-rate" value="0.02133" step="0.00001" onchange="recalcAll()" style="flex:1;">
+                <button class="btn btn-primary" onclick="fetchExchangeRate()" title="Auto-fetch rate based on trip end date" style="white-space:nowrap; font-size:12px;">🔄 Auto-Fetch Rate</button>
+              </div>
+              <span id="rate-fetch-status" style="font-size:11px; color:#888; margin-top:3px; display:block;">Rate source: manual. Click "🔄 Auto-Fetch" to get rate for your trip end date.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section D: Notes (MOVED HERE) -->
+        <div class="form-section">
+          <div class="form-section-header">Notes &amp; Daily Limit Settings</div>
+          <!-- Policy Quick Reference -->
+          <div style="background:#f0f4ff; border:1px solid #c5d0f0; border-radius:6px; padding:10px 14px; margin-bottom:14px; font-size:12px;">
+            <strong style="color:#1a1a2e;">📋 KRAFTON TW Official Allowance Policy — Economy Class</strong>
+            <table style="width:100%; margin-top:8px; border-collapse:collapse; font-size:11px; text-align:center;">
+              <tbody><tr style="background:#1a1a2e; color:white;">
+                <th style="padding:5px 8px; text-align:left;">Tier</th>
+                <th style="padding:5px 8px;">🏨 Accom./night</th>
+                <th style="padding:5px 8px;">🚌 Transport/day</th>
+                <th style="padding:5px 8px;">🍽 Meals/day</th>
+                <th style="padding:5px 8px;">📶 Roaming/day</th>
+                <th style="padding:5px 8px;">🛡 Insurance/day</th>
+                <th style="padding:5px 8px; text-align:left;">Applicable Countries</th>
+              </tr>
+              <tr style="background:#fff3e0;">
+                <td style="padding:5px 8px; text-align:left; font-weight:700;">Tier 1</td>
+                <td>NT$10,350</td><td>NT$1,500</td><td>NT$2,100</td><td>NT$439</td><td>NT$450</td>
+                <td style="text-align:left; font-size:10px;">United States, Canada, Netherlands, Switzerland, United Kingdom, Singapore, United Arab Emirates, Australia</td>
+              </tr>
+              <tr style="background:#e8f5e9;">
+                <td style="padding:5px 8px; text-align:left; font-weight:700;">Tier 2</td>
+                <td>NT$8,700</td><td>NT$1,350</td><td>NT$1,650</td><td>NT$439</td><td>NT$450</td>
+                <td style="text-align:left; font-size:10px;">Germany, Sweden, Spain, Czech Republic, Portugal, Finland, Japan, Hong Kong, Saudi Arabia, Oceania (others), Europe (others)</td>
+              </tr>
+              <tr style="background:#f3e5f5;">
+                <td style="padding:5px 8px; text-align:left; font-weight:700;">Tier 3</td>
+                <td>NT$6,300</td><td>NT$900</td><td>NT$1,350</td><td>NT$439</td><td>NT$450</td>
+                <td style="text-align:left; font-size:10px;">China, India, Brazil, Serbia, Poland, Uzbekistan, Thailand, Taiwan, Türkiye, Philippines, Malaysia, Vietnam, Indonesia, Korea, Asia (others), Central &amp; South America (others), Middle East (others), Africa (others)</td>
+              </tr>
+            </tbody></table>
+            <div style="margin-top:8px; color:#555; line-height:1.6;">
+              • All expenses are reimbursed up to the daily limit (actual receipt required).<br>
+              • Accommodation: limit includes taxes &amp; fees.<br>
+              • Transportation: includes all local transport from accommodation to work site.<br>
+              • Roaming: includes on-board Wi-Fi and data usage fees.
+            </div>
+          </div>
+          <div style="font-size:12px; font-weight:600; color:#888; margin-bottom:6px;">⚙️ Current Limits (Auto-filled by Tier, or edit manually)</div>
+          <div class="daily-limit-grid" style="grid-template-columns: repeat(5,1fr); gap:6px; padding:8px;">
+            <div class="limit-input-group">
+              <label style="font-size:10px;">🏨 Accom./night</label>
+              <input type="number" class="form-input" id="lim-accom" value="6300" min="0" step="100" onchange="recalcAll()" style="padding:5px 6px; font-size:12px;">
+              <span class="limit-hint" id="hint-accom" style="font-size:9px;">Tier 3: NT$6,300/night</span>
+            </div>
+            <div class="limit-input-group">
+              <label style="font-size:10px;">🍽 Meals/day</label>
+              <input type="number" class="form-input" id="lim-meals" value="1350" min="0" step="100" onchange="recalcAll()" style="padding:5px 6px; font-size:12px;">
+              <span class="limit-hint" id="hint-meals" style="font-size:9px;">Tier 3: NT$1,350/day</span>
+            </div>
+            <div class="limit-input-group">
+              <label style="font-size:10px;">🚌 Transport/day</label>
+              <input type="number" class="form-input" id="lim-transport" value="900" min="0" step="100" onchange="recalcAll()" style="padding:5px 6px; font-size:12px;">
+              <span class="limit-hint" id="hint-transport" style="font-size:9px;">Tier 3: NT$900/day</span>
+            </div>
+            <div class="limit-input-group">
+              <label style="font-size:10px;">📶 Roaming/day</label>
+              <input type="number" class="form-input" id="lim-roaming" value="439" min="0" step="50" onchange="recalcAll()" style="padding:5px 6px; font-size:12px;">
+              <span class="limit-hint" id="hint-roaming" style="font-size:9px;">Tier 3: NT$439/day</span>
+            </div>
+            <div class="limit-input-group">
+              <label style="font-size:10px;">🛡 Insurance/day</label>
+              <input type="number" class="form-input" id="lim-insurance" value="450" min="0" step="50" onchange="recalcAll()" style="padding:5px 6px; font-size:12px;">
+              <span class="limit-hint" id="hint-insurance" style="font-size:9px;">Tier 3: NT$450/day</span>
+            </div>
+          </div>
+          <div style="margin-top:12px; font-size:12px; font-weight:600; color:#888;">📝 Notes</div>
+          <textarea class="form-input" id="inp-notes" style="width:100%; box-sizing:border-box;">Allowance Policy: Tier 3 (Korea/China/India/SEA/Others) applied.
+- Accommodation: max NT$6,300/night (incl. tax)
+- Meals: max NT$1,350/day
+- Transportation: max NT$900/day
+- Roaming: max NT$439/day
+- Travel Insurance: max NT$450/day
+All items require official receipts.
+            </textarea>
+        </div>
+
+        <!-- Section B: Itinerary -->
+        <div class="form-section">
+          <div class="form-section-header">
+            01. Itinerary
+            <button class="btn btn-primary" onclick="addItineraryRow()" style="font-size: 12px; padding: 4px 8px">
+              + Add Row
+            </button>
+          </div>
+          <table class="data-table" id="table-itinerary">
+            <thead>
+              <tr>
+                <th width="20%">Date</th>
+                <th width="30%">Destination</th>
+                <th width="40%">Activity / Purpose</th>
+                <th width="10%">Action</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-itinerary">
+              <!-- Rows added via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Section C: Expenses -->
+        <div class="form-section">
+          <div class="form-section-header">
+            02. Expense Details
+            <button class="btn btn-primary" onclick="addExpenseRow()" style="font-size: 12px; padding: 4px 8px">
+              + Add Expense
+            </button>
+          </div>
+          <table class="data-table" id="table-expenses">
+            <thead style="position: sticky; top: 0; z-index: 10">
+              <tr>
+                <th width="11%">Date</th>
+                <th width="13%">Category</th>
+                <th width="22%">Description</th>
+                <th width="9%" id="th-foreign-cur">外幣 (KRW)</th>
+                <th width="8%">台幣 (NTD)</th>
+                <th width="7%">手續費</th>
+                <th width="10%">備註</th>
+                <th width="11%">Settlement (NTD)</th>
+                <th width="6%">收據</th>
+                <th width="3%"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-expenses">
+              <!-- Rows added via JS -->
+            
+            </tbody><tfoot>
+              <tr class="summary-row">
+                <td colspan="3">Subtotal</td>
+                <td id="sum-krw">0</td>
+                <td id="sum-ntd-cash">0</td>
+                <td id="sum-fee">0</td>
+                <td>Total Settlement:</td>
+                <td id="sum-total-settlement" style="font-size: 15px; color: #f4a535">0</td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Compliance Check Panel -->
+        <div class="compliance-panel" id="compliance-panel">
+          <div class="compliance-header">
+            <span>📊 Compliance Check — Daily Limit Status</span>
+            <span id="compliance-trip-days" style="font-size:11px; color:#f4a535;">4 days trip</span>
+          </div>
+          <table class="compliance-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Daily Limit (NT$)</th>
+                <th>Max Allowed</th>
+                <th>Claimed</th>
+                <th>Approved</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="compliance-tbody">
+            <tr style="opacity:0.5;">
+              <td><strong>Meals</strong></td>
+              <td>NT$ 1,350 / day</td>
+              <td>NT$ 5,400 <span style="color:#aaa">(1,350×4d)</span></td>
+              <td style="">NT$ 0</td>
+              <td>NT$ 0</td>
+              <td><span style="color:#aaa">—</span></td>
+            </tr>
+          
+            <tr style="opacity:0.5;">
+              <td><strong>Transportation</strong></td>
+              <td>NT$ 900 / day</td>
+              <td>NT$ 3,600 <span style="color:#aaa">(900×4d)</span></td>
+              <td style="">NT$ 0</td>
+              <td>NT$ 0</td>
+              <td><span style="color:#aaa">—</span></td>
+            </tr>
+          
+            <tr style="opacity:0.5;">
+              <td><strong>Roaming</strong></td>
+              <td>NT$ 439 / day</td>
+              <td>NT$ 1,756 <span style="color:#aaa">(439×4d)</span></td>
+              <td style="">NT$ 0</td>
+              <td>NT$ 0</td>
+              <td><span style="color:#aaa">—</span></td>
+            </tr>
+          
+            <tr style="opacity:0.5;">
+              <td><strong>Travel Insurance</strong></td>
+              <td>NT$ 450 / day</td>
+              <td>NT$ 1,800 <span style="color:#aaa">(450×4d)</span></td>
+              <td style="">NT$ 0</td>
+              <td>NT$ 0</td>
+              <td><span style="color:#aaa">—</span></td>
+            </tr>
+          </tbody>
+            <tfoot>
+              <tr style="background:#f8f9fa; font-weight:700; font-size:12px;">
+                <td colspan="4" style="padding:8px 12px; text-align:right;">Gross Total:</td>
+                <td style="padding:8px 12px;" id="c-gross-total">NT$ 0</td>
+                <td></td>
+              </tr>
+              <tr class="net-total-row">
+                <td colspan="4" style="padding:8px 12px; text-align:right;">✅ Net Settlement (After Cap):</td>
+                <td style="padding: 8px 12px; color: rgb(26, 26, 46); font-size: 14px;" id="c-net-total">NT$ 0</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- PREVIEW VIEW -->
+      <div id="preview-view">
+        <div class="report-header">
+          <h1 class="report-title">Business Trip Expense Report</h1>
+          <div style="color: var(--primary-navy); font-weight: 500">KRAFTON Taiwan</div>
+
+          <div class="report-meta-grid">
+            <div class="report-meta-item">
+              <strong>Trip Name</strong>
+              <span id="prev-tripname"></span>
+            </div>
+            <div class="report-meta-item">
+              <strong>Applicant</strong>
+              <span id="prev-applicant"></span>
+            </div>
+            <div class="report-meta-item">
+              <strong>Trip Period</strong>
+              <span id="prev-period"></span>
+            </div>
+            <div class="report-meta-item">
+              <strong>Application Date</strong>
+              <span id="prev-appdate"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-cards">
+          <div class="stat-card highlight">
+            <div class="stat-label">Total Amount</div>
+            <div class="stat-val" id="stat-total"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Duration</div>
+            <div class="stat-val" id="stat-days"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Items</div>
+            <div class="stat-val" id="stat-items"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Exchange Rate</div>
+            <div class="stat-val" id="stat-rate"></div>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <div class="report-h2">01. Trip Itinerary</div>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th width="20%">Date</th>
+                <th width="30%">Destination</th>
+                <th>Activity / Purpose</th>
+              </tr>
+            </thead>
+            <tbody id="prev-tbody-itinerary"></tbody>
+          </table>
+        </div>
+
+        <div class="report-section">
+          <div class="report-h2">02. Expense Details</div>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th width="12%">Date</th>
+                <th width="14%">Category</th>
+                <th width="24%">Description</th>
+                <th width="9%" style="text-align: right" id="prev-th-foreign">外幣</th>
+                <th width="9%" style="text-align: right">台幣 (NTD)</th>
+                <th width="8%" style="text-align: right">手續費</th>
+                <th width="10%" style="text-align: right">Settlement</th>
+                <th width="12%">備註</th>
+              </tr>
+            </thead>
+            <tbody id="prev-tbody-expenses"></tbody>
+          </table>
+        </div>
+
+        <div class="report-section">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px">
+            <div>
+              <div class="report-h2">03. Exchange Rate</div>
+              <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; font-size: 13px">
+                <p style="margin: 0 0 5px 0"><strong>Currency Pair:</strong> <span id="prev-currency-pair">KRW → NTD</span></p>
+                <p style="margin: 0 0 5px 0">
+                  <strong>Applied Rate:</strong> 1 <span id="prev-cur-label">KRW</span> = <span id="prev-rate-val"></span> NTD
+                </p>
+                <p style="margin: 0; color: #888; font-size: 11px">Source: Bank of Taiwan (Historical Spot Rate)</p>
+              </div>
+            </div>
+            <div>
+              <div class="report-h2">04. Category Summary</div>
+              <div id="prev-category-summary"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <div class="report-h2">05. Final Settlement</div>
+          <div style="background: #f8f9fa; padding: 20px; text-align: center; border: 1px solid #eee; margin-bottom: 20px">
+            <div style="font-size: 12px; color: #666; text-transform: uppercase">Total Settlement Amount</div>
+            <div style="font-size: 32px; font-weight: 800; color: var(--primary-navy); margin: 5px 0">
+              NT$ <span id="prev-final-total"></span>
+            </div>
+            <div style="font-size: 12px; color: #888">New Taiwan Dollar (NTD)</div>
+          </div>
+
+          <!-- Deduction Box -->
+          <div id="prev-deduction-box" style="display:none; background:#fffbf0; border:1px solid #f4a535; border-radius:6px; padding:14px; margin-bottom:16px;"></div>
+
+          <div style="
+              font-size: 12px;
+              color: #555;
+              white-space: pre-wrap;
+              background: white;
+              border: 1px solid #eee;
+              padding: 15px;
+            " id="prev-notes"></div>
+
+          <div class="sig-grid">
+            <div class="sig-box">
+              <div class="sig-title">Applicant</div>
+              <div class="sig-line"><span>Signature:</span> <span>Date:</span></div>
+            </div>
+            <div class="sig-box">
+              <div class="sig-title">Supervisor</div>
+              <div class="sig-line"><span>Signature:</span> <span>Date:</span></div>
+            </div>
+            <div class="sig-box">
+              <div class="sig-title">Finance</div>
+              <div class="sig-line"><span>Signature:</span> <span>Date:</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Receipts Section -->
+        <div class="report-section receipt-section" id="prev-receipt-section" style="display:none;">
+          <div class="report-h2">06. Receipt Attachments</div>
+          <div class="receipt-grid" id="prev-receipt-grid"></div>
+        </div>
+
+      </div>
+
+      <button class="print-fab" id="btn-print" onclick="window.print()">🖨️ Print / Save PDF</button>
+
+
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+      <span class="lightbox-close">×</span>
+      <img id="lightbox-img" src="" alt="Receipt" data-height-listener-added="true">
+    </div>
+
+
+
+
+
+    <script>
+      // Initial Data — Korea HQ Business Trip Sample (Tier 3)
+      const initItinerary = [
+        { date: '2026-03-16', dest: 'Taipei (TPE) → Seoul (ICN)', purpose: 'Departure – Flight to Seoul for KRAFTON HQ visit' },
+        { date: '2026-03-17', dest: 'Seoul, Korea – KRAFTON HQ', purpose: 'HQ Visit – Business Meetings with HQ Teams' },
+        { date: '2026-03-18', dest: 'Seoul, Korea – KRAFTON HQ', purpose: 'Strategy Review & Cross-team Collaboration Meeting' },
+        { date: '2026-03-19', dest: 'Seoul (ICN) → Taipei (TPE)', purpose: 'Return – Flight back to Taipei' },
+      ];
+
+      const initExpenses = [
+        // Korea HQ Business Trip — 4 Days (Tier 3 韓國), Exchange Rate: 1 KRW = 0.02133 NTD
+        { date: '2026-03-16', cat: 'Flight',           desc: 'Economy Air Ticket (TPE ↔ ICN) – Round-trip',   krw: 0,     ntd: 11500, fee: 0,   rem: 'Economy class' },
+        { date: '2026-03-16', cat: 'Accommodation',    desc: 'Hotel Seoul (3 nights, Mar 16–19)',              krw: 0,     ntd: 18300, fee: 0,   rem: '3 nights × NT$6,100 (within NT$6,300/night limit)' },
+        { date: '2026-03-16', cat: 'Transportation',   desc: 'Airport transfers + local transport',            krw: 65000, ntd: 0,     fee: 150, rem: 'AREX + subway (within NT$900/day limit)' },
+        { date: '2026-03-16', cat: 'Roaming',          desc: 'eSIM – Korea 4-day data plan',                  krw: 0,     ntd: 1200,  fee: 0,   rem: 'Within NT$439/day limit' },
+        { date: '2026-03-16', cat: 'Travel Insurance', desc: 'Travel Insurance (4 days)',                      krw: 0,     ntd: 1600,  fee: 0,   rem: '4 days × NT$400 (within NT$450/day limit)' },
+      ];
+
+      const categories = [
+        'Flight', 'Accommodation', 'Transportation', 'Meals',
+        'Roaming', 'Travel Insurance', 'Others',
+      ];
+      const badgeMap = {
+        Flight: 'bg-flight', Accommodation: 'bg-hotel', Transportation: 'bg-transport',
+        Meals: 'bg-meals', Roaming: 'bg-roaming', 'Travel Insurance': 'bg-insurance', Others: 'bg-others',
+      };
+      const colorMap = {
+        Flight: '#1565c0', Accommodation: '#7b1fa2', Transportation: '#2e7d32',
+        Meals: '#ef6c00', Roaming: '#00695c', 'Travel Insurance': '#c62828', Others: '#455a64',
+      };
+
+      // --- Tier Policy Data ---
+      const TIER_POLICY = {
+        '1': { accom: 10350, transport: 1500, meals: 2100, roaming: 439, insurance: 450, label: 'Tier 1 (USA/Canada/UK/SG/AU/UAE)' },
+        '2': { accom: 8700,  transport: 1350, meals: 1650, roaming: 439, insurance: 450, label: 'Tier 2 (Germany/Japan/HK/Europe others)' },
+        '3': { accom: 6300,  transport: 900,  meals: 1350, roaming: 439, insurance: 450, label: 'Tier 3 (Korea/China/India/SEA/Others)' },
+      };
+
+      function setTierLimits(tier) {
+        if (!tier || tier === '0') return;
+        const p = TIER_POLICY[tier];
+        if (!p) return;
+        document.getElementById('lim-accom').value     = p.accom;
+        document.getElementById('lim-meals').value     = p.meals;
+        document.getElementById('lim-transport').value = p.transport;
+        document.getElementById('lim-roaming').value   = p.roaming;
+        document.getElementById('lim-insurance').value = p.insurance;
+        document.getElementById('hint-accom').innerText     = `${p.label}: NT$${p.accom.toLocaleString()}/night`;
+        document.getElementById('hint-meals').innerText     = `${p.label}: NT$${p.meals.toLocaleString()}/day`;
+        document.getElementById('hint-transport').innerText = `${p.label}: NT$${p.transport.toLocaleString()}/day`;
+        document.getElementById('hint-roaming').innerText   = `${p.label}: NT$${p.roaming.toLocaleString()}/day`;
+        document.getElementById('hint-insurance').innerText = `${p.label}: NT$${p.insurance.toLocaleString()}/day`;
+        recalcAll();
+        showToast(`✅ Limits updated for ${p.label}`);
+      }
+
+      function updateRateLabel() {
+        const cur = document.getElementById('inp-currency').value.toUpperCase();
+        document.getElementById('rate-label').innerText = `${cur} → NTD Exchange Rate`;
+        recalcAll(); // also updates column header
+      }
+
+      async function fetchExchangeRate() {
+        const currency = document.getElementById('inp-currency').value.toLowerCase();
+        const toDate   = document.getElementById('inp-dateto').value;
+        const statusEl = document.getElementById('rate-fetch-status');
+
+        if (!toDate) {
+          statusEl.innerText = '⚠️ Please set Trip Period "To" date first.';
+          statusEl.style.color = '#c62828';
+          return;
+        }
+        statusEl.innerText = '⏳ Fetching rate...';
+        statusEl.style.color = '#888';
+
+        const url = `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${toDate}/v1/currencies/${currency}.min.json`;
+        const fallbackUrl = `https://latest.currency-api.pages.dev/v1/currencies/${currency}.min.json`;
+
+        try {
+          let response = await fetch(url);
+          if (!response.ok) throw new Error('Date not found, trying latest');
+          const data = await response.json();
+          const rate = data[currency] && data[currency]['twd'];
+          if (!rate) throw new Error('TWD rate not found in response');
+          document.getElementById('inp-rate').value = rate.toFixed(5);
+          recalcAll();
+          statusEl.innerText = `✅ Rate fetched: 1 ${currency.toUpperCase()} = ${rate.toFixed(5)} NTD  (Source: currency-api, date: ${toDate})`;
+          statusEl.style.color = '#2e7d32';
+        } catch (err) {
+          try {
+            let response2 = await fetch(fallbackUrl);
+            const data2 = await response2.json();
+            const rate2 = data2[currency] && data2[currency]['twd'];
+            if (!rate2) throw new Error('fallback also failed');
+            document.getElementById('inp-rate').value = rate2.toFixed(5);
+            recalcAll();
+            statusEl.innerText = `✅ Rate fetched (latest): 1 ${currency.toUpperCase()} = ${rate2.toFixed(5)} NTD  ⚠️ Historical date unavailable, using latest.`;
+            statusEl.style.color = '#ef6c00';
+          } catch (err2) {
+            statusEl.innerText = `❌ Auto-fetch failed. Please enter rate manually. (${err.message})`;
+            statusEl.style.color = '#c62828';
+          }
+        }
+      }
+
+      // --- Logic ---
+
+      function init() {
+        initItinerary.forEach((item) => {
+          addItineraryRow(item.date, item.dest, item.purpose);
+        });
+        initExpenses.forEach((item) => {
+          addExpenseRow(item.date, item.cat, item.desc, item.krw, item.ntd, item.fee || 0, item.rem);
+        });
+        recalcAll();
+      }
+
+      function addItineraryRow(date = '', dest = '', purpose = '') {
+        const tbody = document.getElementById('tbody-itinerary');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="date" class="table-input itin-date" value="${date}"></td>
+            <td><input type="text" class="table-input itin-dest" value="${dest}" placeholder="City/Place"></td>
+            <td><input type="text" class="table-input itin-purp" value="${purpose}" placeholder="Description"></td>
+            <td style="text-align:center"><button class="btn btn-danger" onclick="deleteRow(this)">🗑️</button></td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      function addExpenseRow(date = '', cat = 'Meals', desc = '', krw = 0, ntd = 0, fee = 0, rem = '') {
+        const tbody = document.getElementById('tbody-expenses');
+        const tr = document.createElement('tr');
+        const uid = 'r' + Date.now() + Math.random().toString(36).slice(2, 6);
+        // Default date: use trip start date if empty
+        if (!date) date = document.getElementById('inp-datefrom').value || '';
+
+        let catOptions = categories
+          .map((c) => `<option value="${c}" ${c === cat ? 'selected' : ''}>${c}</option>`)
+          .join('');
+
+        tr.innerHTML = `
+            <td><input type="date" class="table-input exp-date" value="${date}"></td>
+            <td><select class="table-input exp-cat">${catOptions}</select></td>
+            <td><input type="text" class="table-input exp-desc" value="${desc}" placeholder="費用說明"></td>
+            <td><input type="number" class="table-input exp-krw" value="${krw}" oninput="recalcRow(this)" step="100" placeholder="0"></td>
+            <td><input type="number" class="table-input exp-ntd" value="${ntd}" oninput="recalcRow(this)" step="1" placeholder="0"></td>
+            <td><input type="number" class="table-input exp-fee" value="${fee}" oninput="recalcRow(this)" step="1" placeholder="0"></td>
+            <td><input type="text" class="table-input exp-rem" value="${rem}" placeholder="備註"></td>
+            <td><input type="text" class="table-input readonly-cell exp-settle" readonly value="0"></td>
+            <td style="text-align:center; min-width:60px;">
+              <input type="file" class="receipt-input exp-receipt" id="${uid}" accept="image/*,application/pdf" onchange="handleReceiptUpload(this)">
+              <label for="${uid}" class="receipt-btn" title="附上收據">📎</label>
+            </td>
+            <td style="text-align:center"><button class="btn btn-danger" onclick="deleteRow(this)">🗑️</button></td>
+        `;
+        tbody.appendChild(tr);
+        recalcRow(tr.querySelector('.exp-krw'));
+      }
+
+      function handleReceiptUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const label = input.nextElementSibling;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          input.dataset.preview = e.target.result;
+          input.dataset.filename = file.name;
+          if (file.type.startsWith('image/')) {
+            label.innerHTML = `<img src="${e.target.result}" class="receipt-thumb" onclick="openLightbox('${e.target.result}')" title="${file.name}">`;
+            label.classList.add('has-file');
+            label.style.border = 'none';
+            label.style.padding = '0';
+          } else {
+            label.innerHTML = `📄`;
+            label.title = file.name;
+            label.classList.add('has-file');
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function deleteRow(btn) {
+        btn.closest('tr').remove();
+        recalcAll();
+      }
+
+      function recalcRow(input) {
+        const tr = input.closest('tr');
+        const rate     = parseFloat(document.getElementById('inp-rate').value) || 0;
+        const krw      = parseFloat(tr.querySelector('.exp-krw').value) || 0;
+        const ntdCash  = parseFloat(tr.querySelector('.exp-ntd').value) || 0;
+        const fee      = parseFloat(tr.querySelector('.exp-fee').value) || 0;
+        // Settlement = foreign currency converted + NTD paid directly + transaction fee
+        const settlement = (krw * rate) + ntdCash + fee;
+        tr.querySelector('.exp-settle').value = settlement.toFixed(1);
+        recalcTotals();
+      }
+
+      function recalcAll() {
+        // Update foreign currency column header dynamically
+        const cur = (document.getElementById('inp-currency').value || 'KRW').toUpperCase();
+        const thForeign = document.getElementById('th-foreign-cur');
+        if (thForeign) thForeign.innerText = `外幣 (${cur})`;
+
+        document.querySelectorAll('#tbody-expenses tr').forEach((tr) => {
+          recalcRow(tr.querySelector('.exp-krw'));
+        });
+        recalcTotals();
+      }
+
+      function getTripDays() {
+        const from = document.getElementById('inp-datefrom').value;
+        const to   = document.getElementById('inp-dateto').value;
+        if (!from || !to) return 1;
+        const days = Math.ceil((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24)) + 1;
+        return isNaN(days) || days < 1 ? 1 : days;
+      }
+
+      function getDailyLimits() {
+        return {
+          'Accommodation':    parseFloat(document.getElementById('lim-accom').value)     || 0,
+          'Meals':            parseFloat(document.getElementById('lim-meals').value)      || 0,
+          'Transportation':   parseFloat(document.getElementById('lim-transport').value)  || 0,
+          'Roaming':          parseFloat(document.getElementById('lim-roaming').value)    || 0,
+          'Travel Insurance': parseFloat(document.getElementById('lim-insurance').value)  || 0,
+        };
+      }
+
+      function getMaxAllowed(cat, dailyRate, days) {
+        if (cat === 'Accommodation') {
+          const nights = Math.max(days - 1, 1);
+          return dailyRate * nights;
+        }
+        return dailyRate * days;
+      }
+
+      function recalcTotals() {
+        let sumKrw = 0, sumNtdCash = 0, sumFee = 0, sumGross = 0;
+        const catClaimed = {};
+
+        document.querySelectorAll('#tbody-expenses tr').forEach((tr) => {
+          sumKrw     += parseFloat(tr.querySelector('.exp-krw').value) || 0;
+          sumNtdCash += parseFloat(tr.querySelector('.exp-ntd').value) || 0;
+          sumFee     += parseFloat(tr.querySelector('.exp-fee').value) || 0;
+          const settle = parseFloat(tr.querySelector('.exp-settle').value) || 0;
+          sumGross   += settle;
+          const cat = tr.querySelector('.exp-cat').value;
+          catClaimed[cat] = (catClaimed[cat] || 0) + settle;
+        });
+
+        const days   = getTripDays();
+        const limits = getDailyLimits();
+        let sumNet = sumGross;
+        let capApplied = false;
+
+        Object.entries(limits).forEach(([cat, dailyRate]) => {
+          if (dailyRate > 0 && catClaimed[cat] !== undefined) {
+            const maxAllowed = getMaxAllowed(cat, dailyRate, days);
+            if (catClaimed[cat] > maxAllowed) {
+              sumNet -= (catClaimed[cat] - maxAllowed);
+              capApplied = true;
+            }
+          }
+        });
+
+        document.getElementById('sum-krw').innerText         = sumKrw.toLocaleString();
+        document.getElementById('sum-ntd-cash').innerText    = sumNtdCash.toLocaleString();
+        document.getElementById('sum-fee').innerText         = sumFee.toLocaleString();
+        document.getElementById('sum-total-settlement').innerText = Math.round(sumNet).toLocaleString();
+        document.getElementById('sum-total-settlement').style.color = capApplied ? '#c62828' : '#f4a535';
+
+        updateCompliancePanel(catClaimed, sumGross, sumNet, days, limits);
+      }
+
+      function updateCompliancePanel(catClaimed, sumGross, sumNet, days, limits) {
+        const tbody = document.getElementById('compliance-tbody');
+        tbody.innerHTML = '';
+        document.getElementById('compliance-trip-days').innerText = days + ' days trip';
+
+        const allCats = new Set([...Object.keys(limits), ...Object.keys(catClaimed)]);
+
+        allCats.forEach(cat => {
+          const claimed = catClaimed[cat] || 0;
+          if (claimed === 0 && !limits[cat]) return;
+          const dailyRate  = limits[cat] || 0;
+          const maxAllowed = dailyRate > 0 ? getMaxAllowed(cat, dailyRate, days) : null;
+          const approved   = maxAllowed !== null ? Math.min(claimed, maxAllowed) : claimed;
+          const over       = maxAllowed !== null && claimed > maxAllowed;
+          const noLimit    = dailyRate === 0;
+
+          let statusHTML, approvedHTML;
+          if (noLimit) {
+            statusHTML   = `<span class="compliance-ok">✅ No limit</span>`;
+            approvedHTML = `NT$ ${Math.round(approved).toLocaleString()}`;
+          } else if (claimed === 0) {
+            statusHTML   = `<span style="color:#aaa">—</span>`;
+            approvedHTML = `NT$ 0`;
+          } else if (over) {
+            statusHTML   = `<span class="compliance-over">⚠️ Capped!</span>`;
+            approvedHTML = `<span style="color:#c62828; font-weight:700;">NT$ ${Math.round(approved).toLocaleString()}</span><span class="cap-badge">CAP</span>`;
+          } else {
+            statusHTML   = `<span class="compliance-ok">✅ OK</span>`;
+            approvedHTML = `NT$ ${Math.round(approved).toLocaleString()}`;
+          }
+
+          const unit      = cat === 'Accommodation' ? 'night' : 'day';
+          const unitCount = cat === 'Accommodation' ? Math.max(days-1,1) : days;
+          const maxStr    = maxAllowed !== null
+            ? `NT$ ${maxAllowed.toLocaleString()} <span style="color:#aaa">(${dailyRate.toLocaleString()}×${unitCount}${unit})</span>`
+            : `<span style="color:#aaa">—</span>`;
+
+          tbody.innerHTML += `
+            <tr style="${over ? 'background:#fff3f3;' : claimed === 0 ? 'opacity:0.5;' : ''}">
+              <td><strong>${cat}</strong></td>
+              <td>${dailyRate > 0 ? 'NT$ ' + dailyRate.toLocaleString() + ' / day' : '<span style="color:#aaa">No limit</span>'}</td>
+              <td>${maxStr}</td>
+              <td style="${over ? 'color:#c62828; font-weight:700;' : ''}">NT$ ${Math.round(claimed).toLocaleString()}</td>
+              <td>${approvedHTML}</td>
+              <td>${statusHTML}</td>
+            </tr>
+          `;
+        });
+
+        document.getElementById('c-gross-total').innerText = 'NT$ ' + Math.round(sumGross).toLocaleString();
+        const el = document.getElementById('c-net-total');
+        el.innerText   = 'NT$ ' + Math.round(sumNet).toLocaleString();
+        el.style.color = sumNet < sumGross ? '#c62828' : '#1a1a2e';
+      }
+
+      function switchMode(mode) {
+        if (mode === 'edit') {
+          document.getElementById('edit-view').style.display    = 'block';
+          document.getElementById('preview-view').style.display = 'none';
+          document.getElementById('btn-edit-mode').classList.add('active');
+          document.getElementById('btn-preview-mode').classList.remove('active');
+          document.getElementById('btn-print').style.display    = 'none';
+        } else {
+          generatePreview();
+          document.getElementById('edit-view').style.display    = 'none';
+          document.getElementById('preview-view').style.display = 'block';
+          document.getElementById('btn-edit-mode').classList.remove('active');
+          document.getElementById('btn-preview-mode').classList.add('active');
+          document.getElementById('btn-print').style.display    = 'block';
+        }
+      }
+
+      function generatePreview() {
+        document.getElementById('prev-tripname').innerText  = document.getElementById('inp-tripname').value;
+        document.getElementById('prev-applicant').innerText = document.getElementById('inp-applicant').value;
+        document.getElementById('prev-appdate').innerText   = document.getElementById('inp-appdate').value;
+
+        const dFrom = document.getElementById('inp-datefrom').value;
+        const dTo   = document.getElementById('inp-dateto').value;
+        document.getElementById('prev-period').innerText = `${dFrom} – ${dTo}`;
+
+        const days = Math.ceil((new Date(dTo) - new Date(dFrom)) / (1000 * 60 * 60 * 24)) + 1;
+        document.getElementById('stat-days').innerText = (isNaN(days) ? '-' : days) + ' Days';
+
+        // Currency info
+        const curCode = (document.getElementById('inp-currency').value || 'krw').toUpperCase();
+        document.getElementById('prev-currency-pair').innerText = `${curCode} → NTD`;
+        document.getElementById('prev-cur-label').innerText     = curCode;
+        const prevThForeign = document.getElementById('prev-th-foreign');
+        if (prevThForeign) prevThForeign.innerText = `外幣 (${curCode})`;
+
+        let totalAmt = 0, itemCount = 0;
+
+        // Itinerary Table
+        const itinTbody = document.getElementById('prev-tbody-itinerary');
+        itinTbody.innerHTML = '';
+        document.querySelectorAll('#tbody-itinerary tr').forEach((row) => {
+          const date = row.querySelector('.itin-date').value;
+          const dest = row.querySelector('.itin-dest').value;
+          const purp = row.querySelector('.itin-purp').value;
+          if (date || dest) {
+            itinTbody.innerHTML += `<tr><td>${date}</td><td>${dest}</td><td>${purp}</td></tr>`;
+          }
+        });
+
+        // Expenses Table
+        const expTbody = document.getElementById('prev-tbody-expenses');
+        expTbody.innerHTML = '';
+        const catTotals = {};
+
+        document.querySelectorAll('#tbody-expenses tr').forEach((row) => {
+          const date   = row.querySelector('.exp-date').value;
+          const cat    = row.querySelector('.exp-cat').value;
+          const desc   = row.querySelector('.exp-desc').value;
+          const krw    = parseFloat(row.querySelector('.exp-krw').value) || 0;
+          const ntd    = parseFloat(row.querySelector('.exp-ntd').value) || 0;
+          const fee    = parseFloat(row.querySelector('.exp-fee').value) || 0;
+          const settle = parseFloat(row.querySelector('.exp-settle').value) || 0;
+          const rem    = row.querySelector('.exp-rem').value;
+
+          itemCount++;
+          totalAmt += settle;
+          catTotals[cat] = (catTotals[cat] || 0) + settle;
+
+          const badgeClass = badgeMap[cat] || 'bg-others';
+
+          expTbody.innerHTML += `
+              <tr>
+                  <td>${date}</td>
+                  <td><span class="badge ${badgeClass}">${cat}</span></td>
+                  <td>${desc}</td>
+                  <td style="text-align:right">${krw > 0 ? krw.toLocaleString() : '-'}</td>
+                  <td style="text-align:right">${ntd > 0 ? ntd.toLocaleString() : '-'}</td>
+                  <td style="text-align:right">${fee > 0 ? fee.toLocaleString() : '-'}</td>
+                  <td style="text-align:right">${Math.round(settle).toLocaleString()}</td>
+                  <td>${rem}</td>
+              </tr>
+          `;
+        });
+
+        document.getElementById('stat-total').innerText  = 'NT$ ' + Math.round(totalAmt).toLocaleString();
+        document.getElementById('stat-items').innerText  = itemCount + ' Items';
+        document.getElementById('stat-rate').innerText   = document.getElementById('inp-rate').value;
+        document.getElementById('prev-rate-val').innerText = document.getElementById('inp-rate').value;
+        document.getElementById('prev-final-total').innerText = Math.round(totalAmt).toLocaleString();
+
+        // Category Bars
+        const catContainer = document.getElementById('prev-category-summary');
+        catContainer.innerHTML = '';
+        Object.keys(catTotals).sort((a,b) => catTotals[b]-catTotals[a]).forEach((cat) => {
+          const val = catTotals[cat];
+          if (val > 0) {
+            const pct   = ((val / totalAmt) * 100).toFixed(1);
+            const color = colorMap[cat] || '#ccc';
+            catContainer.innerHTML += `
+              <div class="cat-row">
+                <div class="cat-name">${cat}</div>
+                <div class="cat-bar-bg">
+                  <div class="cat-bar-fill" style="width: ${pct}%; background-color: ${color}"></div>
+                </div>
+                <div class="cat-amt">${Math.round(val).toLocaleString()}</div>
+              </div>`;
+          }
+        });
+
+        document.getElementById('prev-notes').innerText = document.getElementById('inp-notes').value;
+
+        // Apply daily cap to preview final total
+        const days2   = Math.ceil((new Date(dTo) - new Date(dFrom)) / (1000*60*60*24)) + 1 || 1;
+        const limits2 = {
+          'Accommodation':    parseFloat(document.getElementById('lim-accom').value)     || 0,
+          'Meals':            parseFloat(document.getElementById('lim-meals').value)      || 0,
+          'Transportation':   parseFloat(document.getElementById('lim-transport').value)  || 0,
+          'Roaming':          parseFloat(document.getElementById('lim-roaming').value)    || 0,
+          'Travel Insurance': parseFloat(document.getElementById('lim-insurance').value)  || 0,
+        };
+        let netTotal = totalAmt;
+        let deductions = [];
+        Object.entries(limits2).forEach(([cat, rate]) => {
+          if (rate > 0 && catTotals[cat]) {
+            const max = getMaxAllowed(cat, rate, days2);
+            if (catTotals[cat] > max) {
+              const diff = catTotals[cat] - max;
+              netTotal -= diff;
+              deductions.push({ cat, claimed: catTotals[cat], max, diff });
+            }
+          }
+        });
+
+        document.getElementById('prev-final-total').innerText = Math.round(netTotal).toLocaleString();
+        document.getElementById('stat-total').innerText       = 'NT$ ' + Math.round(netTotal).toLocaleString();
+
+        const dedBox = document.getElementById('prev-deduction-box');
+        if (deductions.length > 0) {
+          let html = `<div style="font-size:12px; color:#555; margin-bottom:8px;"><strong>⚠️ Daily Limit Adjustments Applied:</strong></div>`;
+          html += `<table style="width:100%; font-size:12px; border-collapse:collapse;">`;
+          html += `<tr style="color:#888;"><th style="text-align:left;padding:4px;">Category</th><th style="text-align:right;padding:4px;">Claimed</th><th style="text-align:right;padding:4px;">Max Allowed</th><th style="text-align:right;padding:4px;">Adjustment</th></tr>`;
+          deductions.forEach(d => {
+            const u2  = d.cat==='Accommodation'?'night':'day';
+            const uc2 = d.cat==='Accommodation'?Math.max(days2-1,1):days2;
+            html += `<tr style="color:#c62828;"><td style="padding:4px;">${d.cat}</td>`;
+            html += `<td style="text-align:right;padding:4px;">NT$ ${Math.round(d.claimed).toLocaleString()}</td>`;
+            html += `<td style="text-align:right;padding:4px;">NT$ ${Math.round(d.max).toLocaleString()} (NT$${(limits2[d.cat]).toLocaleString()}×${uc2} ${u2})</td>`;
+            html += `<td style="text-align:right;padding:4px; font-weight:700;">– NT$ ${Math.round(d.diff).toLocaleString()}</td></tr>`;
+          });
+          html += `<tr style="border-top:1px solid #eee; font-weight:700;"><td colspan="3" style="padding:6px 4px; text-align:right;">Gross Total:</td><td style="text-align:right;padding:6px 4px;">NT$ ${Math.round(totalAmt).toLocaleString()}</td></tr>`;
+          html += `<tr style="background:#fff8e1; font-weight:700;"><td colspan="3" style="padding:6px 4px; text-align:right; color:#1a1a2e;">✅ Net Settlement:</td><td style="text-align:right;padding:6px 4px; color:#c62828; font-size:15px;">NT$ ${Math.round(netTotal).toLocaleString()}</td></tr>`;
+          html += `</table>`;
+          dedBox.innerHTML = html;
+          dedBox.style.display = 'block';
+        } else {
+          dedBox.style.display = 'none';
+        }
+
+        // Receipts
+        const receiptGrid    = document.getElementById('prev-receipt-grid');
+        const receiptSection = document.getElementById('prev-receipt-section');
+        receiptGrid.innerHTML = '';
+        let hasReceipt = false;
+        document.querySelectorAll('#tbody-expenses tr').forEach((row) => {
+          const receiptInput = row.querySelector('.exp-receipt');
+          const desc = row.querySelector('.exp-desc').value;
+          const date = row.querySelector('.exp-date').value;
+          if (receiptInput && receiptInput.dataset.preview) {
+            hasReceipt = true;
+            const isImage = receiptInput.dataset.preview.startsWith('data:image');
+            receiptGrid.innerHTML += `
+              <div class="receipt-item">
+                ${isImage
+                  ? `<img src="${receiptInput.dataset.preview}" onclick="openLightbox('${receiptInput.dataset.preview}')" title="Click to enlarge" style="cursor:pointer;" />`
+                  : `<div style="background:#f1f3f5; height:100px; display:flex; align-items:center; justify-content:center; font-size:28px; border-radius:4px; border:1px solid #ddd;">📄</div>`
+                }
+                <div class="receipt-label"><strong>${date}</strong><br>${desc}</div>
+              </div>`;
+          }
+        });
+        receiptSection.style.display = hasReceipt ? 'block' : 'none';
+      }
+
+      function openLightbox(src) {
+        document.getElementById('lightbox-img').src = src;
+        document.getElementById('lightbox').classList.add('show');
+      }
+
+      function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('show');
+      }
+
+      /* ===== LOAD FROM URL PARAMETER (Read-Only Mode for Manager) ===== */
+      function loadFromURL() {
+        const params     = new URLSearchParams(window.location.search);
+        const reportData = params.get('report');
+        if (!reportData) return false;
+
+        try {
+          const data = JSON.parse(decodeURIComponent(escape(atob(reportData))));
+
+          document.getElementById('inp-applicant').value = data.applicant || '';
+          document.getElementById('inp-tripname').value  = data.tripname  || '';
+          document.getElementById('inp-appdate').value   = data.appdate   || '';
+          document.getElementById('inp-datefrom').value  = data.datefrom  || '';
+          document.getElementById('inp-dateto').value    = data.dateto    || '';
+          document.getElementById('inp-rate').value      = data.rate      || '0.0235';
+          document.getElementById('inp-notes').value     = data.notes     || '';
+          if (data.limits) {
+            if (data.limits.accom)     document.getElementById('lim-accom').value     = data.limits.accom;
+            if (data.limits.meals)     document.getElementById('lim-meals').value     = data.limits.meals;
+            if (data.limits.transport) document.getElementById('lim-transport').value = data.limits.transport;
+            if (data.limits.roaming)   document.getElementById('lim-roaming').value   = data.limits.roaming;
+            if (data.limits.insurance) document.getElementById('lim-insurance').value = data.limits.insurance;
+          }
+
+          document.getElementById('tbody-itinerary').innerHTML = '';
+          (data.itinerary || []).forEach(item => {
+            addItineraryRow(item.date, item.dest, item.purp);
+          });
+
+          document.getElementById('tbody-expenses').innerHTML = '';
+          (data.expenses || []).forEach(item => {
+            addExpenseRow(item.date, item.cat, item.desc, parseFloat(item.krw)||0, parseFloat(item.ntd)||0, parseFloat(item.fee)||0, item.rem);
+          });
+
+          recalcAll();
+          switchMode('preview');
+
+          const banner = document.createElement('div');
+          banner.className = 'readonly-banner';
+          banner.innerHTML = '👀 <strong>Read-Only View</strong> — This report was submitted by <strong>' + data.applicant + '</strong>. You are viewing their expense report.';
+          document.getElementById('preview-view').insertBefore(banner, document.getElementById('preview-view').firstChild);
+
+          document.getElementById('btn-edit-mode').style.display    = 'none';
+          document.getElementById('btn-preview-mode').style.display = 'none';
+
+          return true;
+        } catch(e) {
+          console.error('Failed to load report from URL', e);
+          return false;
+        }
+      }
+
+      function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+          background: #1a1a2e; color: white; padding: 12px 24px; border-radius: 30px;
+          font-size: 13px; font-weight: 600; z-index: 9999;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.3); max-width: 90vw; text-align: center;
+        `;
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+      }
+
+      // Auto-generate preview before print (fixes blank PDF issue)
+      window.addEventListener('beforeprint', function() {
+        generatePreview();
+      });
+
+      // Start
+      init();
+      loadFromURL();
+    </script>
+  
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body></html>
