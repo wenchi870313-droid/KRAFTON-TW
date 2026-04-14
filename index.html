@@ -1099,7 +1099,7 @@ All items require official receipts.
                 <th width="12%">Date</th>
                 <th width="14%">Category</th>
                 <th width="24%">Description</th>
-                <th width="9%" style="text-align: right" id="prev-th-foreign">外幣</th>
+                <th width="9%" style="text-align: right" id="prev-th-foreign">Foreign Amount</th>
                 <th width="9%" style="text-align: right">台幣 (NTD)</th>
                 <th width="8%" style="text-align: right">手續費</th>
                 <th width="10%" style="text-align: right">Settlement</th>
@@ -1392,7 +1392,7 @@ All items require official receipts.
         // Update foreign currency column header dynamically
         const cur = (document.getElementById('inp-currency').value || 'KRW').toUpperCase();
         const thForeign = document.getElementById('th-foreign-cur');
-        if (thForeign) thForeign.innerText = `外幣 (${cur})`;
+        if (thForeign) thForeign.innerText = `Foreign Amount (${cur})`;
 
         document.querySelectorAll('#tbody-expenses tr').forEach((tr) => {
           recalcRow(tr.querySelector('.exp-krw'));
@@ -1553,7 +1553,7 @@ All items require official receipts.
         document.getElementById('prev-currency-pair').innerText = `${curCode} → NTD`;
         document.getElementById('prev-cur-label').innerText     = curCode;
         const prevThForeign = document.getElementById('prev-th-foreign');
-        if (prevThForeign) prevThForeign.innerText = `外幣 (${curCode})`;
+        if (prevThForeign) prevThForeign.innerText = `Foreign Amount (${curCode})`;
 
         let totalAmt = 0, itemCount = 0;
 
